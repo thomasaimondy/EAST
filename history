@@ -1,0 +1,244 @@
+source activate jiashuncheng
+cd jiashuncheng
+source .bashrc
+cd /zhangtielin/hat
+cd ~/zhangtielin/hat
+ls
+du -h
+cd src/
+ls
+cd dat
+ls
+cd ..
+ls
+vim run.py 
+cd dataloaders/
+ls
+cd ..
+ls
+du -h
+cd ..
+du -h
+ls
+pwd
+cd ..
+cd hat/
+ls
+pwd
+cd dat
+ls
+cd ..
+cd jiashuncheng/
+ls
+cd code/
+ls
+cd hat/
+ls
+cd src/
+ls
+cd dataloaders/
+ls
+vim pmnist.py 
+cd ..
+pwd
+cd ..
+cd zhangtielin/
+cd hat/
+ls
+pwd
+cd jiashuncheng/
+ls
+cd code/
+ls
+cd hat-increment
+ls
+cd src/
+ls
+cd new
+cd networks/
+ls
+cd ..
+cd res/
+ls
+cd ..
+ccd ..
+cd ..
+source .bashrc 
+cd code/
+ls
+cd hat-increment
+ls
+cd src
+ls
+run.py --help
+python run.py --hep
+python run.py --help
+cd ..
+ls
+cd res/
+ls
+cd test/
+ls
+cd ..
+cd src/
+ls
+nvdia-smi
+nvidia-smi
+nvdia-smi
+nvidia-smi
+pwdx 22038
+nvidia-smi
+vim run.py 
+nohup python -u run.py --nepochs=10 --spike-windows=2 --output=es_10_2 --gpu=0 > log 2>&1 & 
+tailf log 
+nvidia-smi
+pwdx 24445
+kill 24445
+nohup python -u run.py --nepochs=100 --spike-windows=2 --output=es_10_2 --gpu=0 > log 2>&1 & 
+kill 24495
+cd ../res/
+ls
+rm -r es_10_2/
+cd ../src/
+ls
+mkdir log
+ls
+rm log 
+ls
+mkdir log
+nohup python -u run.py --nepochs=100 --spike-windows=2 --output=es_100_2 --gpu=0 > log/es_100_2 2>&1 & 
+nohup python -u run.py --nepochs=100 --spike-windows=10 --output=es_100_10 --gpu=2 > log/es_100_10 2>&1 & 
+nvidia-smi
+nohup python -u run.py --nepochs=100 --spike-windows=20 --output=es_100_20 --gpu=3 > log/es_100_20 2>&1 & 
+nvidia-smi
+tailf log/es_100_2
+nvidia-smi
+jobs
+nohup python -u run.py --nepochs=10 --spike-windows=2 --output=es_10_2 --gpu=0 > log/es_10_2 2>&1 & 
+nohup python -u run.py --nepochs=10 --spike-windows=10 --output=es_10_10 --gpu=2 > log/es_10_10 2>&1 & 
+nohup python -u run.py --nepochs=10 --spike-windows=20 --output=es_10_20 --gpu=3 > log/es_10_20 2>&1 & 
+nvidia-smi
+nohup python -u run.py --nepochs=1000 --spike-windows=2 --output=es_1000_2 --gpu=0 > log/es_1000_2 2>&1 & 
+nohup python -u run.py --nepochs=1000 --spike-windows=10 --output=es_1000_10 --gpu=2 > log/es_1000_10 2>&1 & 
+jobs
+nohup python -u run.py --nepochs=1000 --spike-windows=20 --output=es_1000_20 --gpu=3 > log/es_1000_20 2>&1 & 
+nvidia-smi
+jobs
+cd 。。
+cd ..
+cd res/
+ls
+cd es_10_2
+;s
+ls
+vim pmnist_edfsnn_0 
+cd ..
+ls
+nvidia-smi
+cd jiashuncheng/
+cd code
+cd ..
+source .bashrc 
+cd code
+cd hat-increment_test/
+tailf log
+exit
+cd jiashuncheng
+source .bashrc
+which python
+cd code/hat-increment_test-modify/
+pwd
+cd src/
+tailf log/es_1000_20_conv-mo
+tailf log/es_1000_20_conv_modify 
+nvidia-smi
+pwd fv
+pwdx 27430
+tailf log/es_1000_20_conv_modify 
+top
+nvidia-smi
+vim approaches/edf.py 
+cd ..
+ls
+cd ..
+ls
+cd ..
+ls
+cd ..
+ls
+cd ..
+ls
+ll
+cd user/
+ls
+cd home/
+ls
+cd user/
+ls
+cd jiashuncheng/
+ls
+rm -r ./*
+ls
+cd ..
+ls
+rm -r home/
+ls
+cd jiashuncheng/
+cd ..
+ls
+cd ..
+ls
+cd uer
+cd user
+ls
+cd user
+cd home
+cd user/
+cd jiashuncheng/
+ls
+cd code/
+ls
+cd hat-increment_test-modify/
+l
+cd jiashuncheng
+source .bashrc
+cd code/
+cd hat-increment_test-modify/
+ls
+pwd
+#1622039685
+cd jiashuncheng
+#1622039685
+source .bashrc
+#1622039688
+la
+#1622039690
+ls
+#1622039697
+cd code/
+#1622039697
+ls
+#1622039701
+cd ..
+#1622039701
+ls
+#1622039706
+cd EDF/
+#1622039707
+ls
+#1622039709
+cd ..
+#1622039727
+cd code/
+#1622039728
+ls
+#1622039731
+cd EDF/
+#1622039731
+l
+#1622039734
+cd hat-owm/hat-owm/
+#1622039734
+ls
+#1622039735
+pwd

@@ -1,0 +1,21 @@
+pid:22509
+{'seed': 0
+ 'mini': True
+ 'experiment': 'mnist10_10'
+ 'approach': 'edfsnn'
+ 'output': '../res/mnist10_10_edfsnn_OWM_单头.txt'
+ 'nepochs': 400
+ 'lr': 0.05
+ 'lr_factor': 1
+ 'parameter': ''
+ 'gpu': '1'
+ 'multi_output': False
+ 'P_normalization': False
+ 'P_proportion': '0.9-0.1'
+ 'spike_windows': 20
+ 'mask': True
+ 'Mask_type': 'Embed'
+ 'B_type': 'Regions_Standard'
+ 'B_plasticity': 'LTP'
+ 'nhid': 100
+ 'plot': False}
