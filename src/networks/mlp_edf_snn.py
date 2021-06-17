@@ -260,7 +260,7 @@ class SpikeLinear(torch.nn.Module):
                         err = grad_LB
                     # change class or not
                     grad_output = self.update_p(x, err, y)
-                    print(self.P_new.mean())  ## thomas
+                    # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False)
                 # Output layers
                 else:
@@ -269,8 +269,10 @@ class SpikeLinear(torch.nn.Module):
                     # CE
                     # err = (self.sumspike / self.spike_window).mul(y)
                     grad_output = self.update_p(x, err, y)
-                    print(self.P_new.mean())  ## thomas
+                    # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False) 
+                    # sumspike_mean = self.sumspike / self.spike_window
+                    # sumspike_mean.backward(gradient = grad_output, retain_graph=False)  # use sum_spike could be better !!
                 
                 if self.args.plot:
                     image = (self.sumspike / self.spike_window).squeeze()

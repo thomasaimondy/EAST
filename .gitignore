@@ -1,5 +1,8 @@
 # delete dat 
 /dat
+/res
+*.pyc
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

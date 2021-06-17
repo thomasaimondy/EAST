@@ -34,7 +34,7 @@ parser.add_argument('--spike_windows',type=int,default=20,help='(default=%(defau
 parser.add_argument('--mask', action='store_true', default=True)
 parser.add_argument('--Mask_type',type=str,default='Embed',required=False, choices=['B','Embed'],help='(default=%(default)s)')
 parser.add_argument('--B_type',type=str,default='Regions_Standard',required=False, choices=['Regions_Standard','Regions_Orthogonal_gain_10','Regions_Orthogonal_gain_1','Orthogonal','Uniform'],help='(default=%(default)s)')
-parser.add_argument('--B_plasticity',type=str,default='LTD',required=False, choices=['LTP','LTD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
+parser.add_argument('--B_plasticity',type=str,default='LB',required=False, choices=['LTP','LTD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
 parser.add_argument('--nhid',type=int,default=100,help='(default=%(default)d)')
 parser.add_argument('--plot', action='store_true', default=False, help='plot inner states')
 args=parser.parse_args()
