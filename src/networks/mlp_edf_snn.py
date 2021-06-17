@@ -245,15 +245,17 @@ class SpikeLinear(torch.nn.Module):
                     grad_LB = y.mm(self.B.view(-1, prod(self.B.shape[1:]))).view(self.spike.shape)
                     if self.args.B_plasticity == 'LTP': 
                         # More spikes more plasticity
-                        err = (self.sumspike / self.spike_window).mul(grad_LB)
+                        err = (self.sumspike).mul(grad_LB)
                     elif self.args.B_plasticity == 'LTD':
                         # More spikes less plasticity
-                        err = (1 - self.sumspike / self.spike_window).mul(grad_LB)
-                    elif self.args.B_plasticity == 'LB':
+                        err = (self.spike_window - self.sumspike).mul(grad_LB)
+                    elif self.args.B_plasticity == 'LB_decay':
                         # Same plasticity more or less spikes   
                         err = grad_LB * torch.exp(torch.Tensor([-e])).cuda()
                     elif self.args.B_plasticity == 'Err':
                         err = self.sumspike / self.spike_window - grad_LB
+                    elif self.args.B_plasticity == 'LB':
+                        err = grad_LB
                     else:
                         err = grad_LB
                     # change class or not
@@ -284,8 +286,8 @@ class Bclass():
             out,hid = B.shape
             w = int(hid/out)
             b = torch.empty(out, w).cuda()
-            nn.init.kaiming_uniform_(b)
-            # nn.init.uniform_(b, a=-1, b=1) 
+            # nn.init.kaiming_uniform_(b)
+            nn.init.uniform_(b, a=-0.5, b=0.5) 
             for i in range(out):
                 B[i,i*w:(i+1)*w] = b[i,:]
         elif args.B_type == 'Regions_Orthogonal_gain_10':

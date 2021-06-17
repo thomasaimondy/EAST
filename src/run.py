@@ -11,18 +11,18 @@ import torch
 import matplotlib.pyplot as plt
 import utils
 tstart=time.time()
+import time
 
 # Arguments
 parser=argparse.ArgumentParser(description='xxx')
 parser.add_argument('--seed',type=int,default=0,help='(default=%(default)d)') #(0, 1,2,3,4,5,6,10,13,25)
 parser.add_argument('--mini', action='store_true', default=True, help='the mini dataset')
-parser.add_argument('--experiment',default='mnist10_10',type=str,required=False,choices=['mnist2','pmnist','cifar','mixture','hwdb','mnist10_10','mnist5_10'],help='(default=%(default)s)')
+parser.add_argument('--experiment',default='hwdb_classIL',type=str,required=False,choices=['mnist2','pmnist','cifar','mixture','hwdb','hwdb_classIL','mnist_classIL','mnist5_10'],help='(default=%(default)s)')
 
 parser.add_argument('--approach',default='edfsnn',type=str,required=False,choices=['random','sgd','sgd-frozen','lwf','lfl','ewc','imm-mean','progressive','pathnet',
-                                                                            'imm-mode','sgd-restart',
-                                                                            'joint','hat','hat-test','edf',  'edfsnn', 'sgdsnn'],help='(default=%(default)s)') #expectation-assisted disperse flow
+                                                                            'imm-mode','sgd-restart','joint','hat','hat-test','edf',  'edfsnn', 'sgdsnn'],help='(default=%(default)s)') #expectation-assisted disperse flow
 parser.add_argument('--output',default='',type=str,required=False,help='(default=%(default)s)')
-parser.add_argument('--nepochs',default=400,type=int,required=False,help='(default=%(default)d)') # enough iteration times is important
+parser.add_argument('--nepochs',default=1000,type=int,required=False,help='(default=%(default)d)') # enough iteration times is important
 parser.add_argument('--lr',default=0.05,type=float,required=False,help='(default=%(default)f)')
 parser.add_argument('--lr_factor',default=1,type=float,required=False,help='(default=%(default)f)')
 parser.add_argument('--parameter',type=str,default='',help='(default=%(default)s)')
@@ -34,28 +34,32 @@ parser.add_argument('--spike_windows',type=int,default=20,help='(default=%(defau
 parser.add_argument('--mask', action='store_true', default=True)
 parser.add_argument('--Mask_type',type=str,default='Embed',required=False, choices=['B','Embed'],help='(default=%(default)s)')
 parser.add_argument('--B_type',type=str,default='Regions_Standard',required=False, choices=['Regions_Standard','Regions_Orthogonal_gain_10','Regions_Orthogonal_gain_1','Orthogonal','Uniform'],help='(default=%(default)s)')
-parser.add_argument('--B_plasticity',type=str,default='LTP',required=False, choices=['LTP','LTD','LB','Err'],help='(default=%(default)s)')
+parser.add_argument('--B_plasticity',type=str,default='LTD',required=False, choices=['LTP','LTD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
 parser.add_argument('--nhid',type=int,default=100,help='(default=%(default)d)')
 parser.add_argument('--plot', action='store_true', default=False, help='plot inner states')
 args=parser.parse_args()
 
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
+timeclock = time.strftime("%Y%m%d%H%M%S", time.localtime()) 
+rootpath = '../res/'+args.experiment+'_'+args.approach
 if args.output=='':
-    if args.multi_output:
-        args.output='../res/'+args.experiment+'_'+args.approach + '_' + '*******' + '_多头' +'.txt'
+    if args.multi_output: 
+        args.output= rootpath + '/' + timeclock + '_MultiHead'
     else:
-        args.output='../res/'+args.experiment+'_'+args.approach + '_' + 'OWM' + '_单头' +'.txt' #args.seed str(5)
+        args.output= rootpath + '/' + timeclock +  '_SingleHead'
+    if not os.path.exists(rootpath):
+        os.makedirs(rootpath)
 else:
-    if not os.path.isdir('../res/'+args.output):
-        os.makedirs('../res/'+args.output)
-    args.output='../res/'+args.output+'/'+args.experiment+'_'+args.approach+'_'+str(args.seed)+'.txt'
+    if not os.path.exists(rootpath):
+        os.makedirs(rootpath)
+    args.output= rootpath + '/' + timeclock + '_' + args.output
 print('='*100)
 print('Arguments =')
 for arg in vars(args):
     print('\t'+arg+':',getattr(args,arg))
 print('='*100)
-f = open(args.output.split('.txt')[0], 'w')
+f = open(args.output + '_configure.txt', 'w+')
 f.write('pid:' + str(os.getpid()) + '\n')
 f.write(str(vars(args)).replace(',', '\n'))
 f.close()
@@ -79,16 +83,18 @@ elif args.experiment=='mnist5':
     from dataloaders import mnist5 as dataloader
 elif args.experiment=='mnist5_10':
     from dataloaders import mnist5_10 as dataloader
-elif args.experiment=='mnist10_10':
-    from dataloaders import mnist10_10 as dataloader
+elif args.experiment=='mnist_classIL':
+    from dataloaders import mnist_classIL as dataloader
 elif args.experiment=='cifar':
     from dataloaders import cifar as dataloader
 elif args.experiment=='mixture':
     from dataloaders import mixture as dataloader
 elif args.experiment=='hwdb':
     from dataloaders import hwdb as dataloader
+elif args.experiment=='hwdb_classIL':
+    from dataloaders import hwdb_classIL as dataloader
 
-# Args -- Approach
+# Args -- Approachs -- Networks
 if args.approach=='random':
     from approaches import random as approach
 elif args.approach=='sgd':
@@ -97,10 +103,14 @@ elif args.approach=='sgd-restart':
     from approaches import sgd_restart as approach
 elif args.approach=='sgd-frozen':
     from approaches import sgd_frozen as approach
+elif args.approach=='sgdsnn':
+    from approaches import sgd as approach
+    from networks import sgd_snn as network
 elif args.approach=='lwf':
     from approaches import lwf as approach
 elif args.approach=='lfl':
     from approaches import lfl as approach
+    from networks import alexnet_lfl as network
 elif args.approach=='ewc':
     from approaches import ewc as approach
 elif args.approach=='imm-mean':
@@ -109,48 +119,27 @@ elif args.approach=='imm-mode':
     from approaches import imm_mode as approach
 elif args.approach=='progressive':
     from approaches import progressive as approach
+    from networks import alexnet_progressive as network
 elif args.approach=='pathnet':
     from approaches import pathnet as approach
+    from networks import alexnet_pathnet as network
 elif args.approach=='hat-test':
     from approaches import hat_test as approach
+    from networks import mlp_hat as network
+    # from networks import alexnet_hat_test as network
 elif args.approach=='hat':
     from approaches import hat as approach
+    from networks import mlp_hat as network
+    # from networks import alexnet_hat as network
 elif args.approach=='joint':
     from approaches import joint as approach
 elif args.approach=='edf':
     from approaches import edf as approach
+    from networks import mlp_edf as network
+    # from networks import alexnet_edf as network
 elif args.approach=='edfsnn':
     from approaches import edfsnn as approach
-# elif args.approach=='sgdsnn':
-#     from approaches import edfsnn as approach
-
-# Args -- Network
-if args.experiment=='mnist2' or args.experiment=='pmnist' or args.experiment=='hwdb' or args.experiment == 'mnist10_10' or args.experiment == 'mnist5' or args.experiment == 'mnist5_10':
-    if args.approach=='hat' or args.approach=='hat-test':
-        from networks import mlp_hat as network
-    elif args.approach=='edf':
-        from networks import mlp_edf as network
-    elif args.approach=='edfsnn':
-        from networks import mlp_edf_snn as network
-    elif args.approach == 'sgdsnn':
-        from networks import sgd_snn as network
-    else:
-        from networks import mlp as network
-else:
-    if args.approach=='lfl':
-        from networks import alexnet_lfl as network
-    elif args.approach=='hat':
-        from networks import alexnet_hat as network
-    elif args.approach=='edf':
-        from networks import alexnet_edf as network
-    elif args.approach=='progressive':
-        from networks import alexnet_progressive as network
-    elif args.approach=='pathnet':
-        from networks import alexnet_pathnet as network
-    elif args.approach=='hat-test':
-        from networks import alexnet_hat_test as network
-    else:
-        from networks import alexnet as network
+    from networks import mlp_edf_snn as network
 
 ########################################################################################################################
 
@@ -161,19 +150,16 @@ print('Input size =',inputsize,'\nTask info =',taskcla)
 
 # Inits
 print('Inits...')
-if args.approach=='edfsnn' or args.approach=='sgdsnn':
-    net=network.Net(args,inputsize,taskcla, labsize, nhid=args.nhid,spike_windows=args.spike_windows).cuda() #edfsnn
+if  'snn' in args.approach:
+    net=network.Net(args,inputsize,taskcla, labsize, nhid=args.nhid,spike_windows=args.spike_windows).cuda()
 else:
-    net=network.Net(args,inputsize,taskcla, nhid=args.nhid).cuda() #others
-# utils.print_model_report(net)
-# f = open(args.output.split('.txt')[0], 'a')
-# f.write('\n\n model:\n' + str(vars(net)) + '\n')
-# f.close()
+    net=network.Net(args,inputsize,taskcla, nhid=args.nhid).cuda()
 
-if args.approach=='edfsnn' or args.approach=='sgdsnn':
+if 'snn' in args.approach:
     appr = approach.Appr(net, labsize ,nepochs=args.nepochs,lr=args.lr, lr_factor = args.lr_factor, args=args)
 else:
     appr = approach.Appr(net, nepochs=args.nepochs, lr=args.lr, args=args)
+
 print(appr.criterion)
 utils.print_optimizer_config(appr.optimizer)
 print('-'*100)
@@ -225,7 +211,7 @@ for t,ncla in taskcla:
     for u in range(t+1):
         xtest=data[u]['test']['x'].cuda()
         ytest=data[u]['test']['y'].cuda()
-        if args.approach == 'edfsnn' or args.approach == 'sgdsnn':
+        if 'snn' in args.approach:
             ytest = torch.zeros(ytest.shape[0], labsize).cuda().scatter_(1, ytest.unsqueeze(1).long(), 1.0).cuda()
         test_loss,test_acc=appr.eval(u,xtest,ytest)
         print('>>> Test on task {:2d} - {:15s}: loss={:.3f}, acc={:5.1f}% <<<'.format(u,data[u]['name'],test_loss,100*test_acc))
@@ -234,7 +220,7 @@ for t,ncla in taskcla:
 
     # Save
     print('Save at '+args.output)
-    np.savetxt(args.output,acc,'%.4f')
+    np.savetxt(args.output + '_acc.txt',acc,'%.4f')
 
 # Done
 print('*'*100)

@@ -1,10 +1,10 @@
-pid:22509
+pid:5027
 {'seed': 0
  'mini': True
- 'experiment': 'mnist10_10'
+ 'experiment': 'hwdb_classIL'
  'approach': 'edfsnn'
- 'output': '../res/mnist10_10_edfsnn_OWM_单头.txt'
- 'nepochs': 400
+ 'output': '../res/hwdb_classIL_edfsnn/20210617112208_SingleHead'
+ 'nepochs': 1000
  'lr': 0.05
  'lr_factor': 1
  'parameter': ''
@@ -16,6 +16,6 @@ pid:22509
  'mask': True
  'Mask_type': 'Embed'
  'B_type': 'Regions_Standard'
- 'B_plasticity': 'LTP'
+ 'B_plasticity': 'LTD'
  'nhid': 100
  'plot': False}
