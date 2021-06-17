@@ -13,7 +13,7 @@ class HWDB(Dataset):
         images = []
         labels = []
         with open(txt_path, 'r') as f:
-            i = 1
+            i = 0
             for line in f:
                 if i > num_class:
                     break
@@ -39,10 +39,11 @@ class HWDB(Dataset):
         self.transforms = transforms
 
     def __getitem__(self, index):
+        # image = Image.open(self.images[index]).convert('RGB')
         image = self.images[index]
         label = self.labels[index]
         image = image[np.newaxis, :]
-        image = Image.fromarray(image)
+        # image = Image.fromarray(image)
 
         if self.transforms is not None:
             image = self.transforms(image)
@@ -91,18 +92,16 @@ def get(seed=0, mini = False):
     size = [1, 32, 32]
     if mini:
         labsize = 10
-        nperm = 10
     else:
         labsize = 3755
-        nperm = 3755
-    seeds = np.array(list(range(nperm)), dtype=int)
+    seeds = np.array(list(range(labsize)), dtype=int)
 
     if not os.path.isdir('../dat/binary_hwdbCIL/'):
         os.makedirs('../dat/binary_hwdbCIL')
         dat = {}
         root = '/home/user/liuhongxing/BRP-SNN-origin/DATASETS/HWDB'
-        dat['train'] = HWDB(root+'/train_mat.txt', num_class=labsize, transforms=False)
-        dat['test'] = HWDB(root+'/train_mat.txt', num_class=labsize, transforms=False)
+        dat['train'] = HWDB(root+'/train_mat.txt', num_class=labsize, transforms=None)
+        dat['test'] = HWDB(root+'/train_mat.txt', num_class=labsize, transforms=None)
         for i, r in enumerate(seeds):
             data[i] = {}
             data[i]['name'] = 'hwdbCIL-{:d}'.format(i)
@@ -113,13 +112,15 @@ def get(seed=0, mini = False):
                 for image, target in loader:
                     aux = image.view(-1).numpy()
                     image = torch.FloatTensor(aux).view(size)
-                    data[i][s]['x'].append(image)
-                    data[i][s]['y'].append(target.numpy()[0])
+                    # Separate different samples into different tasks
+                    if i == target.numpy()[0]:
+                        data[i][s]['x'].append(image)
+                        data[i][s]['y'].append(target.numpy()[0])
             for s in ['train', 'test']:
                 data[i][s]['x'] = torch.stack(data[i][s]['x']).view(-1, size[0], size[1], size[2])
                 data[i][s]['y'] = torch.LongTensor(np.array(data[i][s]['y'], dtype=int)).view(-1)
-                torch.save(data[i][s]['x'],os.path.join(os.path.expanduser('../dat/binary_hwdb/'), 'data' + str(r) + s + 'x.bin'))
-                torch.save(data[i][s]['y'],os.path.join(os.path.expanduser('../dat/binary_hwdb/'), 'data' + str(r) + s + 'y.bin'))
+                torch.save(data[i][s]['x'],os.path.join(os.path.expanduser('../dat/binary_hwdbCIL/'), 'data' + str(r) + s + 'x.bin'))
+                torch.save(data[i][s]['y'],os.path.join(os.path.expanduser('../dat/binary_hwdbCIL/'), 'data' + str(r) + s + 'y.bin'))
     else:
         for i, r in enumerate(seeds):
             data[i] = dict.fromkeys(['name', 'ncla', 'train', 'test'])
@@ -127,8 +128,8 @@ def get(seed=0, mini = False):
             data[i]['name'] = 'hwdbCIL-{:d}'.format(i)
             for s in ['train', 'test']:
                 data[i][s] = {'x': [], 'y': []}
-                data[i][s]['x'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdb'), 'data' + str(r) + s + 'x.bin'))
-                data[i][s]['y'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdb'), 'data' + str(r) + s + 'y.bin'))
+                data[i][s]['x'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdbCIL'), 'data' + str(r) + s + 'x.bin'))
+                data[i][s]['y'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdbCIL'), 'data' + str(r) + s + 'y.bin'))
 
     # Validation
     for t in data.keys():
