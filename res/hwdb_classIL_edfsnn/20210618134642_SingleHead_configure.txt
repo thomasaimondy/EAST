@@ -1,0 +1,21 @@
+pid:11549
+{'seed': 0
+ 'mini': False
+ 'experiment': 'hwdb_classIL'
+ 'approach': 'edfsnn'
+ 'output': '../res/hwdb_classIL_edfsnn/20210618134642_SingleHead'
+ 'nepochs': 1000
+ 'lr': 0.05
+ 'lr_factor': 1
+ 'parameter': ''
+ 'gpu': '1'
+ 'multi_output': False
+ 'P_normalization': False
+ 'P_proportion': '0.9-0.1'
+ 'spike_windows': 20
+ 'mask': True
+ 'Mask_type': 'Embed'
+ 'B_type': 'Regions_Standard'
+ 'B_plasticity': 'LB'
+ 'nhid': 100
+ 'plot': False}

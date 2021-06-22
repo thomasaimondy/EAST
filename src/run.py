@@ -1,8 +1,8 @@
 ##########################################################################################
 #### Code for Incremental learning of SNNs using E-flow
 #### Multiple benchmark datasets and ANNs using SOTA algorithms (EWC, SGD, Joint, ...)
-#### 2021-06-09， CASIA, Tielin Zhang, Shuncheng Jia, Hongxing Liu
-#### Based on architectures of OWM [Shan, Yu, NMI, 2020] and HAT [Serrà, 2018, ICML]
+#### 2021-06-09, CASIA, Tielin Zhang, Shuncheng Jia, Hongxing Liu
+#### Based on architectures of OWM [Shan, Yu, NMI, 2020] and HAT [Serra, 2018, ICML]
 #########################################################################################
 
 import sys,os,argparse,time
@@ -17,7 +17,8 @@ import time
 parser=argparse.ArgumentParser(description='xxx')
 parser.add_argument('--seed',type=int,default=0,help='(default=%(default)d)') #(0, 1,2,3,4,5,6,10,13,25)
 parser.add_argument('--mini', action='store_true', default=True, help='the mini dataset')
-parser.add_argument('--experiment',default='hwdb_classIL',type=str,required=False,choices=['mnist2','pmnist','cifar','mixture','hwdb','hwdb_classIL','mnist_classIL','mnist5_10'],help='(default=%(default)s)')
+parser.add_argument('--experiment',default='hwdb_taskIL',type=str,required=False,choices=['pmnist','cifar','mixture','hwdb_taskIL',
+                                                                    'hwdb_classIL','mnist_classIL','mnist5_taskIL'],help='(default=%(default)s)')
 
 parser.add_argument('--approach',default='edfsnn',type=str,required=False,choices=['random','sgd','sgd-frozen','lwf','lfl','ewc','imm-mean','progressive','pathnet',
                                                                             'imm-mode','sgd-restart','joint','hat','hat-test','edf',  'edfsnn', 'sgdsnn'],help='(default=%(default)s)') #expectation-assisted disperse flow
@@ -26,7 +27,7 @@ parser.add_argument('--nepochs',default=1000,type=int,required=False,help='(defa
 parser.add_argument('--lr',default=0.05,type=float,required=False,help='(default=%(default)f)')
 parser.add_argument('--lr_factor',default=1,type=float,required=False,help='(default=%(default)f)')
 parser.add_argument('--parameter',type=str,default='',help='(default=%(default)s)')
-parser.add_argument('--gpu',type=str,default='1',help='(default=%(default)s)')
+parser.add_argument('--gpu',type=str,default='3',help='(default=%(default)s)')
 parser.add_argument('--multi_output', action='store_true', default=False, help='the type of ouput layer')
 parser.add_argument('--P_normalization', action='store_true', default=False, help='the normalization of P vector')
 parser.add_argument('--P_proportion',type=str,default='0.9-0.1',required=False, choices=['0.9-0.1','0.5-0.5','0.1-0.9', '0-1'],help='(default=%(default)s)')
@@ -34,7 +35,7 @@ parser.add_argument('--spike_windows',type=int,default=20,help='(default=%(defau
 parser.add_argument('--mask', action='store_true', default=True)
 parser.add_argument('--Mask_type',type=str,default='Embed',required=False, choices=['B','Embed'],help='(default=%(default)s)')
 parser.add_argument('--B_type',type=str,default='Regions_Standard',required=False, choices=['Regions_Standard','Regions_Orthogonal_gain_10','Regions_Orthogonal_gain_1','Orthogonal','Uniform'],help='(default=%(default)s)')
-parser.add_argument('--B_plasticity',type=str,default='LB',required=False, choices=['LTP','LTD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
+parser.add_argument('--B_plasticity',type=str,default='LB',required=False, choices=['STF','STD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
 parser.add_argument('--nhid',type=int,default=100,help='(default=%(default)d)')
 parser.add_argument('--plot', action='store_true', default=False, help='plot inner states')
 args=parser.parse_args()
@@ -73,24 +74,20 @@ if torch.cuda.is_available(): torch.cuda.manual_seed(args.seed)
 else: print('[CUDA unavailable]'); sys.exit()
 
 # Args -- Experiment
-if args.experiment=='mnist2':
-    from dataloaders import mnist2 as dataloader
-elif args.experiment=='pmnist':
+if args.experiment=='pmnist':
     from dataloaders import pmnist as dataloader
 elif args.experiment=='mnist10':
     from dataloaders import mnist10 as dataloader
-elif args.experiment=='mnist5':
-    from dataloaders import mnist5 as dataloader
-elif args.experiment=='mnist5_10':
-    from dataloaders import mnist5_10 as dataloader
+elif args.experiment=='mnist5_taskIL':
+    from dataloaders import mnist5_taskIL as dataloader
 elif args.experiment=='mnist_classIL':
     from dataloaders import mnist_classIL as dataloader
 elif args.experiment=='cifar':
     from dataloaders import cifar as dataloader
 elif args.experiment=='mixture':
     from dataloaders import mixture as dataloader
-elif args.experiment=='hwdb':
-    from dataloaders import hwdb as dataloader
+elif args.experiment=='hwdb_taskIL':
+    from dataloaders import hwdb_taskIL as dataloader
 elif args.experiment=='hwdb_classIL':
     from dataloaders import hwdb_classIL as dataloader
 
@@ -226,15 +223,15 @@ for t,ncla in taskcla:
 print('*'*100)
 print('Accuracies =')
 for i in range(acc.shape[0]):
-    print('\t',end='')
+    print('\t')
     for j in range(acc.shape[1]):
-        print('{:5.1f}% '.format(100*acc[i,j]),end='')
+        print('{:5.1f}% '.format(100*acc[i,j]))
     print()
 print('*'*100)
 
 print('Done!')
 
 for i in range(acc.shape[0]):
-    print('{:5.1f}% '.format(100*acc[i,:i+1].mean()),end='')
+    print('{:5.1f}% '.format(100*acc[i,:i+1].mean()))
 
 print('[Elapsed time = {:.1f} h]'.format((time.time()-tstart)/(60*60)))

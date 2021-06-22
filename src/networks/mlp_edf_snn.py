@@ -166,6 +166,7 @@ class SpikeLinear(torch.nn.Module):
         self.y_old = 0
 
     def update_p_1(self, input_, LB, y):
+            
             r = torch.mean(input_,0,True)
             k = torch.mm(self.P, torch.t(r))
             temP = torch.mm(k,torch.t(k)) / (0.00001 + torch.mm(r,k))
@@ -243,10 +244,10 @@ class SpikeLinear(torch.nn.Module):
                 # Hidden layers
                 if self.layer != -1:
                     grad_LB = y.mm(self.B.view(-1, prod(self.B.shape[1:]))).view(self.spike.shape)
-                    if self.args.B_plasticity == 'LTP': 
+                    if self.args.B_plasticity == 'STF': 
                         # More spikes more plasticity
                         err = (self.sumspike).mul(grad_LB)
-                    elif self.args.B_plasticity == 'LTD':
+                    elif self.args.B_plasticity == 'STD':
                         # More spikes less plasticity
                         err = (self.spike_window - self.sumspike).mul(grad_LB)
                     elif self.args.B_plasticity == 'LB_decay':

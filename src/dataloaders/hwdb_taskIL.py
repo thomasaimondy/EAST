@@ -60,15 +60,13 @@ def HWDB_classes_txt(root, out_path, num_class=None):
     :param num_class: how many classes needed
     :return: None
     '''
-    dirs = os.listdir(root) # 列出根目录下所有类别所在文件夹名
-    if not num_class:		# 不指定类别数量就读取所有
+    dirs = os.listdir(root)
+    if not num_class:
         num_class = len(dirs)
     print(num_class)
-    if not os.path.exists(out_path): # 输出文件路径不存在就新建
+    if not os.path.exists(out_path):
         f = open(out_path, 'w')
         f.close()
-	# 如果文件中本来就有一部分内容，只需要补充剩余部分
-	# 如果文件中数据的类别数比需要的多就跳过
     with open(out_path, 'r+') as f:
         try:
             end = int(f.readlines()[-1].split('/')[-2]) + 1
@@ -79,10 +77,6 @@ def HWDB_classes_txt(root, out_path, num_class=None):
             dirs = dirs[end:num_class]
             for dir in dirs:
                 f.write(os.path.join(root, dir) + '\n')
-                # files = os.listdir(os.path.join(root, dir))
-                # for file in files:
-                #     f.write(os.path.join(root, dir, file) + '\n')
-
 
 ########################################################################################################################
 
@@ -92,46 +86,52 @@ def get(seed=0, mini = False):
     size = [1, 32, 32]
     if mini:
         labsize = 10
-        nperm = 10
+        nperm = int(10/2)
     else:
-        labsize = 3755
-        nperm = 3755
-    seeds = np.array(list(range(nperm)), dtype=int)
+        labsize = 3754
+        nperm = int(3754/2)
+    seeds = np.array(list(range(labsize)), dtype=int)
 
-    if not os.path.isdir('../dat/binary_hwdbCIL/'):
-        os.makedirs('../dat/binary_hwdbCIL')
+    if not os.path.isdir('../dat/binary_hwdbTIL/'):
+        os.makedirs('../dat/binary_hwdbTIL')
         dat = {}
-        root = '/home/user/liuhongxing/BRP-SNN-origin/DATASETS/HWDB'
+        root = '/home/zhangtielin/maincode/DATASETS/HWDB'
         dat['train'] = HWDB(root+'/train_mat.txt', num_class=labsize, transforms=None)
         dat['test'] = HWDB(root+'/train_mat.txt', num_class=labsize, transforms=None)
         for i, r in enumerate(seeds):
-            data[i] = {}
-            data[i]['name'] = 'hwdbCIL-{:d}'.format(i)
-            data[i]['ncla'] = labsize
+            j = int(i/2)
+            data[j] = {}
+            data[j]['name'] = 'hwdbCIL-{:d}'.format(i)
+            data[j]['ncla'] = nperm
             for s in ['train', 'test']:
                 loader = torch.utils.data.DataLoader(dat[s], batch_size=1, shuffle=False)
-                data[i][s] = {'x': [], 'y': []}
+                data[j][s] = {'x': [], 'y': []}
                 for image, target in loader:
                     aux = image.view(-1).numpy()
                     image = torch.FloatTensor(aux).view(size)
-                    # Separate different samples into different tasks
+                    # Separate different samples into different tasks, separate labels
                     if i == target.numpy()[0]:
-                        data[i][s]['x'].append(image)
-                        data[i][s]['y'].append(target.numpy()[0])
+                        data[j][s]['x'].insert(0,image)
+                        data[j][s]['y'].insert(0,target.numpy()[0])
+                    if i+1 == target.numpy()[0]:
+                        data[j][s]['x'].append(0,image)
+                        data[j][s]['y'].append(0,target.numpy()[0])
             for s in ['train', 'test']:
-                data[i][s]['x'] = torch.stack(data[i][s]['x']).view(-1, size[0], size[1], size[2])
-                data[i][s]['y'] = torch.LongTensor(np.array(data[i][s]['y'], dtype=int)).view(-1)
-                torch.save(data[i][s]['x'],os.path.join(os.path.expanduser('../dat/binary_hwdbCIL/'), 'data' + str(r) + s + 'x.bin'))
-                torch.save(data[i][s]['y'],os.path.join(os.path.expanduser('../dat/binary_hwdbCIL/'), 'data' + str(r) + s + 'y.bin'))
+                data[j][s]['x'] = torch.stack(data[j][s]['x']).view(-1, size[0], size[1], size[2])
+                data[j][s]['y'] = torch.LongTensor(np.array(data[j][s]['y'], dtype=int)).view(-1)
+                torch.save(data[j][s]['x'],os.path.join(os.path.expanduser('../dat/binary_hwdbTIL/'), 'data' + str(r) + s + 'x.bin'))
+                torch.save(data[j][s]['y'],os.path.join(os.path.expanduser('../dat/binary_hwdbTIL/'), 'data' + str(r) + s + 'y.bin'))
+            
     else:
         for i, r in enumerate(seeds):
-            data[i] = dict.fromkeys(['name', 'ncla', 'train', 'test'])
-            data[i]['ncla'] = labsize
-            data[i]['name'] = 'hwdbCIL-{:d}'.format(i)
+            j = int(i/2)
+            data[j] = dict.fromkeys(['name', 'ncla', 'train', 'test'])
+            data[j]['ncla'] = nperm
+            data[j]['name'] = 'hwdbCIL-{:d}'.format(i)
             for s in ['train', 'test']:
-                data[i][s] = {'x': [], 'y': []}
-                data[i][s]['x'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdbCIL'), 'data' + str(r) + s + 'x.bin'))
-                data[i][s]['y'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdbCIL'), 'data' + str(r) + s + 'y.bin'))
+                data[j][s] = {'x': [], 'y': []}
+                data[j][s]['x'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdbTIL'), 'data' + str(r) + s + 'x.bin'))
+                data[j][s]['y'] = torch.load(os.path.join(os.path.expanduser('../dat/binary_hwdbTIL'), 'data' + str(r) + s + 'y.bin'))
 
     # Validation
     for t in data.keys():
@@ -147,12 +147,3 @@ def get(seed=0, mini = False):
     data['ncla'] = n
 
     return data, taskcla, size, labsize
-
-########################################################################################################################
-# 使用def HWDB_classes_txt获取并保存数据存储路径
-# root1 = '/home/user/liuhongxing/BRP-SNN-origin/DATASETS/HWDB'
-# root2 = '/data1/liuhongxing/HDWB/CHW_mat3755'
-
-# root2 = '/data1/liuhongxing/HDWB/CHW_mat3755'
-# HWDB_classes_txt(root2 + '/train_each_1000', root1 + '/train_1000_mat.txt')
-# HWDB_classes_txt(root2 + '/test_each_1000', root1 + '/test_1000_mat.txt')
