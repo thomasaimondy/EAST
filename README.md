@@ -1,4 +1,4 @@
-# E-Flow
+# EAST
 
 ## Abstract
 
