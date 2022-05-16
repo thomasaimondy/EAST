@@ -16,7 +16,7 @@ import time
 # Arguments
 parser=argparse.ArgumentParser(description='xxx')
 parser.add_argument('--seed',type=int,default=0,help='(default=%(default)d)') #(0,1,4,100,1300)
-parser.add_argument('--mini', action='store_false', help='the mini dataset')
+parser.add_argument('--mini', action='store_true', help='the mini dataset')
 parser.add_argument('--experiment',default='hwdb_classIL',type=str,required=False,choices=['mnist2','pmnist','phwdb','cifar','mixture','hwdb','hwdb_classIL','mnist_classIL','mnist5_10','hwdb_taskIL','mnist_taskIL'],help='(default=%(default)s)')
 
 parser.add_argument('--approach',default='edfsnn',type=str,required=False,choices=['random','sgd','sgd-frozen','lwf','lfl','ewc','imm-mean','progressive','pathnet','imm-mode','sgd-restart','joint','hat','hat-test','edf',  'edfsnn', 'sgdsnn'],help='(default=%(default)s)') #expectation-assisted disperse flow
@@ -43,7 +43,7 @@ args=parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
 timeclock = time.strftime("%Y%m%d%H%M%S", time.localtime()) 
-rootpath = '../res/'+args.experiment+'_'+args.approach
+rootpath = os.path.dirname(__file__)+'/../res/'+args.experiment+'_'+args.approach
 if args.output=='':
     if args.multi_output: 
         args.output= rootpath + '/' + timeclock + '_MultiHead'

@@ -18,8 +18,8 @@ def get(seed=0,mini = False, fixed_order=False,pc_valid=0):
     mean=(0.1307,)
     std=(0.3081,)
     dat={}
-    dat['train']=datasets.MNIST('../dat/',train=True,download=True,transform=transforms.Compose([transforms.ToTensor(),transforms.Normalize(mean,std)]))
-    dat['test']=datasets.MNIST('../dat/',train=False,download=True,transform=transforms.Compose([transforms.ToTensor(),transforms.Normalize(mean,std)]))
+    dat['train']=datasets.MNIST(os.path.dirname(__file__)+'/../../dat/',train=True,download=True,transform=transforms.Compose([transforms.ToTensor(),transforms.Normalize(mean,std)]))
+    dat['test']=datasets.MNIST(os.path.dirname(__file__)+'/../../dat/',train=False,download=True,transform=transforms.Compose([transforms.ToTensor(),transforms.Normalize(mean,std)]))
     data[0]={}
     data[0]['name']='mnist-{}'.format(seeds[0])
     data[0]['ncla']=10
