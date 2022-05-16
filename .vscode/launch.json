@@ -10,7 +10,11 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "args":
+            [
+                "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0"
+            ]
         }
     ]
 }
