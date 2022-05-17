@@ -5,7 +5,11 @@ import torch
 from tqdm import tqdm
 
 TraceOfOutput = []
+TraceOfHidden = []
 begin = False
+train_mode = None
+trace_name = None
+without_P = False
 
 ########################################################################################################################
 

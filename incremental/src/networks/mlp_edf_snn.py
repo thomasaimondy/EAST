@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import os
 sys.path.append("..")
 import utils
+
 spike_args = {}
 spike_args['thresh'] = 0.5
 spike_args['lens'] = 0.5
@@ -88,9 +89,11 @@ class Net(torch.nn.Module):
              # hidden
             for li in range(len(self.fcs)):
                 gfc = masks[li]
-                h = self.fcs[li](h, laby, gfc, t, e)    
+                h = self.fcs[li](h, laby, gfc, t, e)
+                if li == 0 and utils.train_mode=='train' and utils.trace_name is not None:
+                    utils.TraceOfHidden.append((t, h)) 
                 h = h.detach()
-            # output
+            # output            
             if self.args.multi_output:
                 self.last[t](h,laby, gfc,t,e)
             else:
@@ -259,7 +262,10 @@ class SpikeLinear(torch.nn.Module):
                     else:
                         err = grad_LB
                     # change class or not
-                    grad_output = self.update_p(x, err, y)
+                    if utils.without_P:
+                        grad_output = err
+                    else:
+                        grad_output = self.update_p(x, err, y)
                     # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False)
                 # Output layers
@@ -268,7 +274,10 @@ class SpikeLinear(torch.nn.Module):
                     err = (self.sumspike / self.spike_window) - y
                     # CE
                     # err = (self.sumspike / self.spike_window).mul(y)
-                    grad_output = self.update_p(x, err, y)
+                    if utils.without_P:
+                        grad_output = err
+                    else:
+                        grad_output = self.update_p(x, err, y)
                     # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False)
                     # sumspike_mean = self.sumspike / self.spike_window

@@ -11,7 +11,9 @@ import torch
 import matplotlib.pyplot as plt
 import utils
 tstart=time.time()
+sys.path.append("..")
 import time
+import pickle
 
 # Arguments
 parser=argparse.ArgumentParser(description='xxx')
@@ -38,8 +40,15 @@ parser.add_argument('--nhid',type=int,default=100,help='(default=%(default)d)')
 parser.add_argument('--sbatch',type=int,default=16,help='(default=%(default)d)')
 parser.add_argument('--nlayers',type=int,default=1,help='(default=%(default)d)')
 parser.add_argument('--plot', action='store_true', default=False, help='plot inner states')
+# save trace
+parser.add_argument('--trace_name', type=str, default=None, help='如果是None, 不会对原有程序产生影响')
+parser.add_argument('--phase', type=str, default=None, help='trace')
+parser.add_argument('--without_P', action='store_true', help='use static matrix N')
 args=parser.parse_args()
 
+utils.train_mode = args.phase
+utils.trace_name = args.trace_name
+utils.without_P = args.without_P
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
 timeclock = time.strftime("%Y%m%d%H%M%S", time.localtime()) 
@@ -66,7 +75,6 @@ f.write('pid:' + str(os.getpid()) + '\n')
 f.write(str(vars(args)).replace(',', '\n'))
 f.close()
 
-print(1)
 ########################################################################################################################
 
 # Seed
@@ -220,11 +228,13 @@ for t,ncla in taskcla:
         image = xtrain[0].squeeze()
         plt.imshow(np.array(image.cpu()))
         plt.savefig('../res/image_In.png',dpi=400)
+    utils.train_mode = 'train'
     appr.train(task,xtrain,ytrain,xvalid,yvalid)
     
     print('-'*100)
 
     # Test
+    utils.train_mode = 'test'
     for u in range(t+1):
         xtest=data[u]['test']['x'].cuda()
         ytest=data[u]['test']['y'].cuda()
@@ -240,6 +250,12 @@ for t,ncla in taskcla:
     torch.save(state, args.output+ '_model.pth')
     print('Save at '+args.output)
     np.savetxt(args.output + '_acc_seed_{}.txt'.format(args.seed),acc,'%.4f')
+
+    if args.trace_name is not None:
+        if t == 2:
+            with open(args.trace_name, 'wb') as f:
+                pickle.dump(utils.TraceOfHidden, f)
+            sys.exit()
 
 # Done
 print('*'*100)
