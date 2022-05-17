@@ -6,10 +6,12 @@ from tqdm import tqdm
 
 TraceOfOutput = []
 TraceOfHidden = []
+TraceOfHiddenTest = []
 begin = False
 train_mode = None
 trace_name = None
 without_P = False
+T = None
 
 ########################################################################################################################
 

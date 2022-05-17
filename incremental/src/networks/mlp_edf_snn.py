@@ -92,6 +92,8 @@ class Net(torch.nn.Module):
                 h = self.fcs[li](h, laby, gfc, t, e)
                 if li == 0 and utils.train_mode=='train' and utils.trace_name is not None:
                     utils.TraceOfHidden.append((t, h)) 
+                if li == 0 and utils.train_mode=='test' and utils.T == 2 and utils.trace_name is not None:
+                    utils.TraceOfHiddenTest.append((t, h)) 
                 h = h.detach()
             # output            
             if self.args.multi_output:

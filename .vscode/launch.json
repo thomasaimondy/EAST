@@ -14,7 +14,7 @@
             "args":
             [
                 // "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Uniform", "--trace_name", "trace_train_B_Uniform", "--phase", "train"
-                "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_train_B_region", "--phase", "train", "--without_P"
+                "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_train_B_region_withoutP", "--phase", "train", "--without_P"
             ]
         }
     ]

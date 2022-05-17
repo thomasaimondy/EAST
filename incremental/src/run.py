@@ -38,6 +38,7 @@ parser.add_argument('--B_type',type=str,default='Regions_Standard',required=Fals
 parser.add_argument('--B_plasticity',type=str,default='LB',required=False, choices=['LTP','LTD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
 parser.add_argument('--nhid',type=int,default=100,help='(default=%(default)d)')
 parser.add_argument('--sbatch',type=int,default=16,help='(default=%(default)d)')
+parser.add_argument('--test_sbatch',type=int,default=16,help='(default=%(default)d)')
 parser.add_argument('--nlayers',type=int,default=1,help='(default=%(default)d)')
 parser.add_argument('--plot', action='store_true', default=False, help='plot inner states')
 # save trace
@@ -235,6 +236,7 @@ for t,ncla in taskcla:
 
     # Test
     utils.train_mode = 'test'
+    utils.T = t
     for u in range(t+1):
         xtest=data[u]['test']['x'].cuda()
         ytest=data[u]['test']['y'].cuda()
@@ -251,10 +253,15 @@ for t,ncla in taskcla:
     print('Save at '+args.output)
     np.savetxt(args.output + '_acc_seed_{}.txt'.format(args.seed),acc,'%.4f')
 
-    if args.trace_name is not None:
+    if args.trace_name is not None and 'train' in args.trace_name:
         if t == 2:
             with open(args.trace_name, 'wb') as f:
                 pickle.dump(utils.TraceOfHidden, f)
+            sys.exit()
+    if args.trace_name is not None and 'test' in args.trace_name:
+        if t == 2:
+            with open(args.trace_name, 'wb') as f:
+                pickle.dump(utils.TraceOfHiddenTest, f)
             sys.exit()
 
 # Done
