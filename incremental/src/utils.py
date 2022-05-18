@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 TraceOfOutput = []
 begin = False
+LBP_mode = None # LB_without_P, LBP, LB_normalizationP, errBP
 
 ########################################################################################################################
 

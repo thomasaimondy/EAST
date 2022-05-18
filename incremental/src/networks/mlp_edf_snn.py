@@ -309,8 +309,13 @@ class SpikeLinear(torch.nn.Module):
                     else:
                         err = grad_LB
                     # change class or not
-                    grad_output = self.update_p_standard(x, err, y) # standard p
-                    # grad_output = self.update_p_normalization(x, err, y) # normalized p
+                    if utils.LBP_mode == 'Static_N':
+                        grad_output = err
+                    if utils.LBP_mode == 'Adaptive_N':
+                        grad_output = self.update_p_standard(x, err, y) # standard p
+                    if utils.LBP_mode == 'Adaptive_norm_N':
+                        grad_output = self.update_p_normalization(x, err, y)  # normalized p
+                    # grad_output = self.update_p_normalization(x, err, y) 
 
                     # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False)
@@ -320,7 +325,13 @@ class SpikeLinear(torch.nn.Module):
                     err = (self.sumspike / self.spike_window) - y
                     # CE
                     # err = (self.sumspike / self.spike_window).mul(y)
-                    grad_output = self.update_p(x, err, y)
+                    if utils.LBP_mode == 'Static_N':
+                        grad_output = err
+                    if utils.LBP_mode == 'Adaptive_N':
+                        grad_output = self.update_p_standard(x, err, y) # standard p
+                    if utils.LBP_mode == 'Adaptive_norm_N':
+                        grad_output = self.update_p_normalization(x, err, y)  # normalized p
+                    # grad_output = self.update_p(x, err, y)
                     # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False)
                     # sumspike_mean = self.sumspike / self.spike_window

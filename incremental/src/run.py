@@ -34,6 +34,7 @@ parser.add_argument('--mask', action='store_true', default=True)
 parser.add_argument('--Mask_type',type=str,default='Embed',required=False, choices=['B','Embed'],help='(default=%(default)s)')
 parser.add_argument('--B_type',type=str,default='Regions_Standard',required=False, choices=['Regions_Standard','Regions_Orthogonal_gain_10','Regions_Orthogonal_gain_1','Orthogonal','Uniform'],help='(default=%(default)s)')
 parser.add_argument('--B_plasticity',type=str,default='LB',required=False, choices=['LTP','LTD','LB', 'LB_decay','Err'],help='(default=%(default)s)')
+parser.add_argument('--LBP_mode',type=str,default='Static_N',required=False, choices=['Static_N','Adaptive_N','Adaptive_norm_N'],help='(default=%(default)s)')
 parser.add_argument('--nhid',type=int,default=100,help='(default=%(default)d)')
 parser.add_argument('--sbatch',type=int,default=16,help='(default=%(default)d)')
 parser.add_argument('--nlayers',type=int,default=1,help='(default=%(default)d)')
@@ -55,7 +56,7 @@ else:
     rootpath = rootpath + '_' + args.output
     if not os.path.exists(rootpath):
         os.makedirs(rootpath)
-    args.output= rootpath + '/' + timeclock + '_nhid' + str(args.nhid)+'_nalyers'+str(args.nlayers)
+    args.output= rootpath + '/' + timeclock + '_nhid' + str(args.nhid)+'_nalyers'+str(args.nlayers)+'_B_plasticity'+args.B_plasticity+'_LBPmode'+args.LBP_mode
 print('='*100)
 print('Arguments =')
 for arg in vars(args):
