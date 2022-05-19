@@ -1,6 +1,7 @@
 dat
 res
 output*
+data
 # delete dat 
 /dat
 *.pyc
