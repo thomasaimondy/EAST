@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 import os
 sys.path.append("..")
 import utils
-
 spike_args = {}
 spike_args['thresh'] = 0.5
 spike_args['lens'] = 0.5
 spike_args['decay'] = 0.5
 from scipy.linalg import orth
 import torch.nn.functional as F
+# from module import FA_wrapper, TrainingHook
 
 class Net(torch.nn.Module):
 
@@ -42,6 +42,12 @@ class Net(torch.nn.Module):
 
         self.fcs = nn.ModuleList()
         self.efcs = nn.ModuleList()
+
+        if utils.B_plasticity == "TP":
+            self.out = torch.zeros(args.sbatch, 10).cuda()
+            self.out.requires_grad = False
+        else:
+            self.out = None
 
         # hidden layer
         for i in range(nlayers):
@@ -72,7 +78,7 @@ class Net(torch.nn.Module):
             self.last=torch.nn.ModuleList()
             for t, n in self.taskcla:
                 self.last.append(SpikeLinear(self.args, nhid,n,nlab,layer=-1)) # 多头
-            
+
         self.gate=torch.nn.Sigmoid()
 
         return
@@ -80,32 +86,35 @@ class Net(torch.nn.Module):
     def forward(self,t,x,laby,e=-1):
         # gc1 = self.gate(self.ec1(t)) #conv
         masks = self.mask(t) #fc
-        
+
         for step in range(self.spike_window):
             # input
             # h = self.c1(x, laby, gc1)
-            # h = h.detach()                                    
+            # h = h.detach()
             h = x.reshape(x.size(0), -1)
              # hidden
             for li in range(len(self.fcs)):
                 gfc = masks[li]
-                h = self.fcs[li](h, laby, gfc, t, e)
+                h = self.fcs[li](h, laby, gfc, t, e, self.out)
                 if li == 0 and utils.train_mode=='train' and utils.trace_name is not None:
                     utils.TraceOfHidden.append((t, h)) 
-                if li == 0 and utils.train_mode=='test' and utils.T == 2 and utils.trace_name is not None:
-                    utils.TraceOfHiddenTest.append((t, h)) 
+                if li == 0 and utils.train_mode=='test' and utils.T == 9 and utils.trace_name is not None:
+                    utils.TraceOfHiddenTest.append((t, h))
                 h = h.detach()
-            # output            
+            # output
             if self.args.multi_output:
-                self.last[t](h,laby, gfc,t,e)
+                self.last[t](h,laby, gfc,t,e, self.out)
             else:
-                self.last(h,laby, gfc,t, e)
+                self.last(h,laby, gfc,t, e, self.out)
 
         # output encoding
         if self.args.multi_output:
             y = self.last[t].sumspike / self.spike_window
         else:
             y = self.last.sumspike / self.spike_window
+        # save output in inference
+        if utils.train_mode=='test' and utils.T == 9 and utils.trace_name is not None:
+            utils.TraceOfOutput.append((t, y)) 
 
         hidden_out = h
         return y, masks[0], hidden_out  #gc1, conv_out
@@ -117,8 +126,8 @@ class Net(torch.nn.Module):
             gfc = self.gate(100*self.efcs[li](t))
             masks.append(gfc)
         return masks
-    
-  
+
+
     def get_view_for(self,n,masks):
         for i in range(len(self.layers)):
             if n == 'fc'+str(i)+'.weight':
@@ -156,6 +165,7 @@ class SpikeLinear(torch.nn.Module):
         self.time_counter = 0
         self.layer = layer
         self.spike_window = args.spike_windows
+        # self.hook = TrainingHook(label_features=out_features, dim_hook=dim_hook, train_mode=args.B_plasticity)
 
         # Inspired from [Shan Yu, NMI, 2020]
         # self.input_size = self.in_features
@@ -166,6 +176,10 @@ class SpikeLinear(torch.nn.Module):
 
         self.P_old = torch.eye(self.in_features).cuda()
         self.P_new = torch.eye(self.in_features).cuda()
+
+        self.input_ = None
+        self.label_ = None
+        self.h = None
 
         # initialization with zero y
         self.y_old = 0
@@ -181,7 +195,7 @@ class SpikeLinear(torch.nn.Module):
             self.P = temP
             return grad_output
 
-    def update_p(self, input_, LB, y):
+    def update_p_standard(self, input_, LB, y):
         grad_output = 0
         # if 4 in y.argmax(dim=1):
         #     print()
@@ -226,8 +240,68 @@ class SpikeLinear(torch.nn.Module):
         # temP = F.normalize(temP, p=2, dim=0)*0.0006
         return grad_output
 
+    def update_p_normalization(self, input_, LB, y):
+        grad_output = 0
+        # if 4 in y.argmax(dim=1):
+        #     print()
+        # Same y, approximate same P, not update P
+
+        with torch.no_grad():
+            old_length = (LB.mean(0) * LB.mean(0)).sum()
+
+        if (self.y_old - y).abs().sum() == 0:
+            r = torch.mean(input_,0,True)
+            k = torch.mm(self.P_old, torch.t(r))
+            temP = torch.mm(k,torch.t(k)) / (0.00001 + torch.mm(r,k))
+            if self.args.P_normalization:
+                temP = F.normalize(temP, p=2, dim=1)
+            temP = torch.sub(self.P_old, temP)
+            Ps_mini = F.interpolate(temP.unsqueeze(0).unsqueeze(0),size=[self.out_features,self.out_features])
+            grad_output = torch.mm(LB, Ps_mini.squeeze(0).squeeze(0))
+            if self.args.P_proportion == '0.9-0.1':
+                self.P_new = self.P_new * 0.9  + temP * 0.1 # Historical P is important
+            elif self.args.P_proportion == '0.5-0.5':
+                self.P_new = self.P_new * 0.5  + temP * 0.5 # Historical P is not very important
+            elif self.args.P_proportion == '0.1-0.9':
+                self.P_new = self.P_new * 0.1  + temP * 0.9 # Historical P is nonesless
+            elif self.args.P_proportion == '0-1':
+                self.P_new = temP # No historical P
+            else:
+                self.P_new = temP # No historical P
+        # update P
+        else:
+            # in case of running only one else
+            if self.P_new.abs().sum() == 0:
+                self.P_new = self.P_old
+            r = torch.mean(input_,0,True)
+            k = torch.mm(self.P_new, torch.t(r))
+            temP = torch.mm(k,torch.t(k)) / (0.00001 + torch.mm(r,k))
+            if self.args.P_normalization:
+                temP = F.normalize(temP, p=2, dim=1)
+            temP = torch.sub(self.P_new, temP)
+            Ps_mini = F.interpolate(temP.unsqueeze(0).unsqueeze(0),size=[self.out_features,self.out_features])
+            grad_output = torch.mm(LB, Ps_mini.squeeze(0).squeeze(0))
+            self.P_old = temP
+            torch.nn.init.constant_(self.P_new, 0)
+            self.y_old = y
+
+        with torch.no_grad():
+            new_length = (grad_output.mean(0) * grad_output.mean(0)).sum()
+
+        # Normalization
+        # temP = F.normalize(temP, p=2, dim=0)*0.0006
+
+        if new_length == 0:
+            result = grad_output
+        else:
+            result = grad_output / new_length * old_length
+
+        return result
+
     # t: current task, x: input, y: output, e: epochs
-    def forward(self,x,y,h_mask,t,e):
+    def forward(self,x,y,h_mask,t,e, out):
+        self.input_ = x
+        self.label_ = y
         if self.time_counter == 0:
             batchsize = x.shape[0]
             self.mem = torch.zeros((batchsize, self.out_features)).cuda()
@@ -248,14 +322,14 @@ class SpikeLinear(torch.nn.Module):
                 # Hidden layers
                 if self.layer != -1:
                     grad_LB = y.mm(self.B.view(-1, prod(self.B.shape[1:]))).view(self.spike.shape)
-                    if self.args.B_plasticity == 'LTP': 
+                    if self.args.B_plasticity == 'LTP':
                         # More spikes more plasticity
                         err = (self.sumspike).mul(grad_LB)
                     elif self.args.B_plasticity == 'LTD':
                         # More spikes less plasticity
                         err = (self.spike_window - self.sumspike).mul(grad_LB)
                     elif self.args.B_plasticity == 'LB_decay':
-                        # Same plasticity more or less spikes   
+                        # Same plasticity more or less spikes
                         err = grad_LB * torch.exp(torch.Tensor([-e])).cuda()
                     elif self.args.B_plasticity == 'Err':
                         err = self.sumspike / self.spike_window - grad_LB
@@ -264,32 +338,42 @@ class SpikeLinear(torch.nn.Module):
                     else:
                         err = grad_LB
                     # change class or not
-                    if utils.without_P:
+                    if utils.LBP_mode == 'Static_N':
                         grad_output = err
-                    else:
-                        grad_output = self.update_p(x, err, y)
+                    if utils.LBP_mode == 'Adaptive_N':
+                        grad_output = self.update_p_standard(x, err, y) # standard p
+                    if utils.LBP_mode == 'Adaptive_norm_N':
+                        grad_output = self.update_p_normalization(x, err, y)  # normalized p
+                    # grad_output = self.update_p_normalization(x, err, y) 
+
                     # print(self.P_new.mean())  ## thomas
-                    self.spike.backward(gradient = grad_output, retain_graph=False)
+                    if utils.B_plasticity == 'TP':
+                        self.h = self.spike
+                    else:
+                        self.spike.backward(gradient = grad_output, retain_graph=False)
                 # Output layers
                 else:
                     # MSE
                     err = (self.sumspike / self.spike_window) - y
                     # CE
                     # err = (self.sumspike / self.spike_window).mul(y)
-                    if utils.without_P:
+                    if utils.LBP_mode == 'Static_N':
                         grad_output = err
-                    else:
-                        grad_output = self.update_p(x, err, y)
+                    if utils.LBP_mode == 'Adaptive_N':
+                        grad_output = self.update_p_standard(x, err, y) # standard p
+                    if utils.LBP_mode == 'Adaptive_norm_N':
+                        grad_output = self.update_p_normalization(x, err, y)  # normalized p
+                    # grad_output = self.update_p(x, err, y)
                     # print(self.P_new.mean())  ## thomas
                     self.spike.backward(gradient = grad_output, retain_graph=False)
                     # sumspike_mean = self.sumspike / self.spike_window
                     # sumspike_mean.backward(gradient = grad_output, retain_graph=False)  # use sum_spike could be better !!
-                
+
                 if self.args.plot:
                     image = (self.sumspike / self.spike_window).squeeze()
                     plt.imshow(np.array(image.detach().cpu()))
                     plt.savefig('../res/image_h_'+str(self.layer)+'.png',dpi=400)
-                    # print()
+
         return self.spike
 
 class Bclass():
@@ -300,7 +384,7 @@ class Bclass():
             w = int(hid/out)
             b = torch.empty(out, w).cuda()
             # nn.init.kaiming_uniform_(b)
-            nn.init.uniform_(b, a=-0.5, b=0.5) 
+            nn.init.uniform_(b, a=-0.5, b=0.5)
             for i in range(out):
                 B[i,i*w:(i+1)*w] = b[i,:]
         elif args.B_type == 'Regions_Orthogonal_gain_10':

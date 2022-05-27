@@ -5,10 +5,12 @@
 ################################################################################
 
 import sys,time
+from turtle import up
 import numpy as np
 import torch
 from tqdm import tqdm
 import utils
+from numpy import prod
 
 torch.autograd.set_detect_anomaly(True)
 
@@ -86,7 +88,7 @@ class Appr(object):
                 print()
                 
                 ## thomas ,quick training
-                if valid_acc>0.99:
+                if valid_acc>0.95:
                     break
                 # if valid_loss < 0.01:
                 #     break
@@ -144,7 +146,15 @@ class Appr(object):
             task=torch.autograd.Variable(torch.LongTensor([t]).cuda(),volatile=False)
             # Forward
             output, masks, hidden_out = self.model.forward(task,images,targets,e)
-
+            if utils.B_plasticity == 'TP':
+                for il in range(len(self.model.fcs)):
+                    FC = self.model.fcs[il]
+                    grad = (output - targets).mm(FC.B.view(-1, prod(FC.B.shape[1:]))).view(FC.h.shape)
+                    if utils.LBP_mode == 'Static_N':
+                        grad_out = grad
+                    if utils.LBP_mode == 'Adaptive_N':
+                        grad_out = FC.update_p_standard(FC.input_, grad, FC.label_)
+                    FC.h.backward(gradient = grad_out, retain_graph=False)
             loss=self.criterion(output,targets,masks)
             
             # Backward (SGD only on last layer)

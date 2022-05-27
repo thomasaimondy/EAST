@@ -1,0 +1,5 @@
+source /home/user/anaconda3/bin/activate
+conda activate jiashuncheng
+source /home/user/anaconda3/bin/activate
+conda activate jiashuncheng
+pwd

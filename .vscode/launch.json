@@ -14,8 +14,36 @@
             "args":
             [
                 // "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Uniform", "--trace_name", "trace_train_B_Uniform", "--phase", "train"
-                // "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_train_B_region_withoutP", "--phase", "train", "--without_P"
-                "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_train_B_region_withoutP", "--phase", "train", "--without_P"
+                // "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--test_sbatch", "256"
+                //  "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--test_sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_B_region_err_woP.pkl", "--phase", "test", "--B_plasticity", "Err"//, "--without_P"
+                //  "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--test_sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_B_region_LB_woP.pkl", "--B_plasticity", "LB", "--without_P", "--LBP_mode", "Static_N", 
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_plasticity", "LB", "--LBP_mode", "Adaptive_norm_N"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "2000", "--nepochs", "1000", "--experiment", "hwdb_classIL", "--nlayers", "1", "--sbatch", "16", "--lr_factor", "2", "--output", "xxxx", "--seed", "0", "--B_plasticity", "LB", "--LBP_mode", "Adaptive_norm_N", "--mini"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "2000", "--nepochs", "1000", "--experiment", "hwdb_classIL", "--nlayers", "1", "--sbatch", "16", "--lr_factor", "2", "--output", "xxxx", "--seed", "0", "--B_plasticity", "LB", "--LBP_mode", "Adaptive_norm_N", "--mini"
+                
+                // trace
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_adaptive_N_10_TP.pkl", "--LBP_mode", "Adaptive_N", "--B_plasticity", "TP"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_adaptive_N_10.pkl", "--LBP_mode", "Adaptive_N", "--B_plasticity", "LB"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_static_N_10.pkl", "--LBP_mode", "Static_N", "--B_plasticity", "LB"
+                
+                // "--gpu", "0", "--lr", "0.005", "--approach", "sgd", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--trace_name", "trace_sgd_10.pkl"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "ewc", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--trace_name", "trace_ewc_10.pkl"
+
+                "--gpu", "0", "--lr", "0.005", "--approach", "joint", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--trace_name", "trace_joint_10.pkl"
+
+                //***********
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_adaptive_norm_N.pkl", "--LBP_mode", "Adaptive_norm_N"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_adaptive_N_err.pkl", "--LBP_mode", "Adaptive_N", "--B_plasticity", "Err"
+
+                // "--gpu", "0", "--lr", "0.005", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--LBP_mode", "Adaptive_N", "--B_plasticity", "TP"
+
             ]
         }
     ]

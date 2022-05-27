@@ -40,6 +40,12 @@ class Net(torch.nn.Module):
         # h = self.maxpool(self.drop(self.relu(self.conv1(x))))
         h=x.view(x.size(0),-1)
         h=self.drop(self.relu(self.fc1(h)))
+
+        # if utils.train_mode=='train' and utils.trace_name is not None:
+            # utils.TraceOfHidden.append((utils.T, h)) 
+        if utils.train_mode=='test' and utils.T == 9 and utils.trace_name is not None:
+            utils.TraceOfHiddenTest.append((utils.u, h))
+
         if self.nlayers > 1:
             h=self.drop(self.relu(self.fc2(h)))
         if self.nlayers > 2:
@@ -50,4 +56,8 @@ class Net(torch.nn.Module):
                 y.append(self.last[t](h))
             else:
                 y.append(self.last(h))
+
+        if utils.train_mode=='test' and utils.T == 9 and utils.trace_name is not None:
+            utils.TraceOfOutput.append((utils.u, self.last(h))) 
+
         return y

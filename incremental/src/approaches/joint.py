@@ -72,10 +72,10 @@ class Appr(object):
                         self.optimizer=self._get_optimizer(lr)
                 print()
 
-                # if valid_acc > 0.99:
-                #     break
-                if valid_loss < 0.01:
+                if valid_acc > 0.95:
                     break
+                # if valid_loss < 0.01:
+                #     break
 
         except KeyboardInterrupt:
             print()
