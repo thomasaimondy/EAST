@@ -8,11 +8,15 @@
             "name": "Python: 当前文件",
             "type": "python",
             "request": "launch",
-            "program": "./incremental/src/run.py",
+            // "program": "./incremental/src/run.py", // incremental 
+            "program": "./classification/others_methods/BRP/main.py", // incremental 
             "console": "integratedTerminal",
             "justMyCode": true,
             "args":
             [
+                //*********** classifical *************
+                
+                //*********** incremental *************
                 // "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Uniform", "--trace_name", "trace_train_B_Uniform", "--phase", "train"
                 // "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--test_sbatch", "256"
                 //  "--gpu", "0", "--lr", "0.01", "--approach", "edfsnn", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--test_sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--B_type", "Regions_Standard", "--trace_name", "trace_B_region_err_woP.pkl", "--phase", "test", "--B_plasticity", "Err"//, "--without_P"
@@ -34,7 +38,7 @@
 
                 // "--gpu", "0", "--lr", "0.005", "--approach", "ewc", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--trace_name", "trace_ewc_10.pkl"
 
-                "--gpu", "0", "--lr", "0.005", "--approach", "joint", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--trace_name", "trace_joint_10.pkl"
+                // "--gpu", "0", "--lr", "0.005", "--approach", "joint", "--nhid", "100", "--nepochs", "50", "--experiment", "mnist_classIL", "--nlayers", "1", "--sbatch", "256", "--lr_factor", "1", "--output", "xxxx", "--seed", "0", "--trace_name", "trace_joint_10.pkl"
 
                 //***********
 

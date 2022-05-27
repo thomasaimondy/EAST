@@ -2,6 +2,7 @@ dat
 res
 trace*
 output*
+log*
 # delete dat 
 /dat
 *.pyc
